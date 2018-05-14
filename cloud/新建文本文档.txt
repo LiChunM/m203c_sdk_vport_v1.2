@@ -1,0 +1,4 @@
+1. 拷贝我们ZYF_APP
+2. C_PREDEF=-D __MY_ZFY_APP__  CLOUD_SOLUTION =MY_ZYF_SOLUTION
+3. 替换配置文件  zyf_config
+4. 写入数据，格式化方式写入 user_data.c
