@@ -888,8 +888,10 @@ void AysConet2Core(u8 *buf,u8 len)
 	p=(u8*)strstr((char*)buf,"+QGSN:");
 	if(p!=NULL)
 		{
+			Ql_memset(systemset.imei,0,sizeof(systemset.imei));
 			Ql_memset(ProSeNum.imei,0,sizeof(ProSeNum.imei));
 			GetImei(ProSeNum.imei,buf);
+			Ql_strcpy(systemset.imei, ProSeNum.imei);
 		}
 	p=(u8*)strstr((char*)buf,"+CCID:");
 	if(p!=NULL)

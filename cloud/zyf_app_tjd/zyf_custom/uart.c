@@ -562,6 +562,7 @@ void User_Commad_Ays(u8 *buf,u8 len)
 		{
 			if(BootInfo==0xFF)
 				{
+					Ql_Sleep(300);
 					mprintf("+PC:%s,%s;\r\n",systemset.imei,systemset.SN);
 				}
 			else

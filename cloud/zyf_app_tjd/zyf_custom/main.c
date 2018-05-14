@@ -143,6 +143,7 @@ void proc_main_task(s32 taskId)
 		            case MSG_ID_RIL_READY:
 		                Ql_RIL_Initialize();
 		                mprintf("RIL is ready\r\n");
+						M203C_send_cmd("AT+QGSN",1<<7,50);
 		            break;
 		            case MSG_ID_USER_START:
 		                break;
