@@ -3,7 +3,7 @@ ZYF_AUTO_CONFIG_T ZYFAutoconfig=
 {
     "b8b71aabdb39",
 	 1883,
-	 "111.198.18.143",
+	 "www.hizyf.com",
 	 "652541",
 	 "admin",
 	 "zyfadmin",
@@ -23,4 +23,4 @@ ZYF_AUTO_CONFIG_T ZYFAutoconfig=
 *22BC:´«Êä¼ä¸ô
 */
 u8 *AutomaticRD[READONLYNUM]={"1792","087B","1480","00EA","1E9D","023A","2557"};
-u8 *AutomaticWR[READWRITE]={"0F82","1685","66AA","22BC"};
+u8 *AutomaticWR[READWRITE]={"0F82","1685","66AA","22BC","150A"};

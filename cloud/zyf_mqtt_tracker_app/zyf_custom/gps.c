@@ -420,6 +420,7 @@ u8 Need_Lbs_Data=0;
 
 s32 GetGpsLocation(u32 timeout, u8 op)
 {
+	u8 times=0;
     s32 iRet;
     if (op)
     {
@@ -436,6 +437,7 @@ s32 GetGpsLocation(u32 timeout, u8 op)
             while (timeout)
             {
                 timeout--;
+				times++;
                 Ql_Sleep(1000);
                 iRet = RIL_GPS_Read("ALL", rdBuff);
                 if (RIL_AT_SUCCESS != iRet)
@@ -450,6 +452,8 @@ s32 GetGpsLocation(u32 timeout, u8 op)
                 }
                 if (gpsx.useorno == 65)
                 {
+                	mprintf("\r\n+++++++++++++++ Gps = %d s ++++++++++++\r\n",times);
+					times=0;
                     iRet = GpsClose();
                     if (RIL_AT_SUCCESS != iRet)
                     {
@@ -532,11 +536,20 @@ s32 WaitLbsGetLocation(u32 timeout)
 }
 
 
+extern u8 Jdbuf[20];
+extern u8 Wdbuf[20];
+
+
 void Callback_Location(s32 result, ST_LocInfo* loc_info)
 {
     mprintf("\r\n<-- Module location: latitude=%f, longitude=%f -->\r\n", loc_info->latitude, loc_info->longitude);
 	LbsJingdu = loc_info->longitude * 1000000;
     LbsWeidu = loc_info->latitude * 1000000;
+
+	Ql_sprintf(Jdbuf,"%.6f",loc_info->longitude);
+	Ql_sprintf(Wdbuf,"%.6f",loc_info->latitude);
+
+	
     Need_Lbs_Data = 2;
 }
 

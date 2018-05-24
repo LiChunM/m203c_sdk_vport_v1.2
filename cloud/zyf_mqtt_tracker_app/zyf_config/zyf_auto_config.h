@@ -2,7 +2,7 @@
 #define 	_PRD_H_ 
 #include "ql_type.h"
 #define READONLYNUM	7
-#define READWRITE	  4
+#define READWRITE	  5
 typedef struct {
 	u8 *pk;
 	u16 port;

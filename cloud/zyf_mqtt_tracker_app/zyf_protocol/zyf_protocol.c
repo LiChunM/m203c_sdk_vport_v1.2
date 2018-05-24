@@ -157,17 +157,22 @@ s32 zyf_msg_RegSensor_data(u8 *data_ptr,void *user_data)
 	cJSON * root =  cJSON_CreateObject();
 	GetModuleData();
 	LBSDataInit();
-	WaitLbsGetLocation(100);
+	ret=WaitLbsGetLocation(200);
 	Ql_sprintf(tempbuf,"%d",module_data.bvol);
     cJSON_AddItemToObject(root, AutomaticRD[4], cJSON_CreateString(tempbuf));
 	Ql_sprintf(tempbuf,"%d",module_data.csq);
     cJSON_AddItemToObject(root, AutomaticRD[5], cJSON_CreateString(tempbuf));
 	Ql_sprintf(tempbuf,"%d",systemset.SysTime);
     cJSON_AddItemToObject(root, AutomaticRD[6], cJSON_CreateString(tempbuf));
-	Ql_sprintf(tempbuf,"%d.%06d",LbsWeidu/1000000,LbsWeidu%1000000);
-	cJSON_AddItemToObject(root, AutomaticRD[0], cJSON_CreateString(tempbuf));
-	Ql_sprintf(tempbuf,"%d.%06d",LbsJingdu/1000000,LbsJingdu%1000000);
-	cJSON_AddItemToObject(root, AutomaticRD[1], cJSON_CreateString(tempbuf));
+
+	if(ret==0)
+		{
+	
+			Ql_sprintf(tempbuf,"%d.%06d",LbsWeidu/1000000,LbsWeidu%1000000);
+			cJSON_AddItemToObject(root, AutomaticRD[0], cJSON_CreateString(tempbuf));
+			Ql_sprintf(tempbuf,"%d.%06d",LbsJingdu/1000000,LbsJingdu%1000000);
+			cJSON_AddItemToObject(root, AutomaticRD[1], cJSON_CreateString(tempbuf));
+		}
 	buf_String=cJSON_Print(root);
 	len = Ql_strlen(buf_String);
 	Ql_strcpy(data_ptr,buf_String);
@@ -179,6 +184,73 @@ s32 zyf_msg_RegSensor_data(u8 *data_ptr,void *user_data)
 }
 
 
+u8 Jdbuf[20];
+u8 Wdbuf[20];
+u8 g_epo_init_sta=0;
+
+
+s32 Gnss_Epo_Init(u8 *lot,u8 *lat)
+{
+	s32  ret = RIL_AT_SUCCESS;
+	char strAT[50] = {0};
+	u16  atLength = 0;
+
+	if(g_epo_init_sta==0)
+		{
+	
+			RIL_GPS_EPO_Config_APN("CMNET","","");
+
+			Ql_memset(strAT, 0x0, sizeof(strAT));
+
+			atLength = Ql_sprintf(strAT,"AT+QGREFLOC=%s,%s",lat,lot);
+
+			ret = Ql_RIL_SendATCmd(strAT, atLength, NULL, NULL, 0);
+
+			if(RIL_ATRSP_SUCCESS != ret)
+			{
+				return ret;
+			}
+
+			
+			ret = RIL_GPS_EPO_Enable(1);
+						
+		    if(RIL_AT_SUCCESS != ret) 
+		       {
+		          mprintf("Set EPO status to 1 fail, iRet = %d.\r\n",ret);
+		          return ret;
+		       }
+
+			ret = RIL_GPS_EPO_Aid();
+						
+		    if(RIL_AT_SUCCESS != ret) 
+		        {
+		           mprintf("EPO aiding fail, iRet = %d.\r\n", ret);
+		           return ret;
+		        }
+		    mprintf("EPO aiding successful, iRet = %d.\r\n", ret);
+
+			g_epo_init_sta=1;
+		}
+	
+	return ret;	
+}
+
+
+
+s32 LbsAEpoStaInit(void)
+{
+	s32  ret = RIL_AT_FAILED;
+	LBSDataInit();
+	ret=WaitLbsGetLocation(200);
+	if(ret!=0)
+		{
+			 return ret;
+		}
+	ret=Gnss_Epo_Init(Jdbuf,Wdbuf);
+	return ret;
+	
+}
+
 
 s32 zyf_msg_Sensor_data(u8 *data_ptr,void *user_data)
 {
@@ -187,22 +259,42 @@ s32 zyf_msg_Sensor_data(u8 *data_ptr,void *user_data)
 	u8 tempbuf[20]={0};
 	cJSON * root =  cJSON_CreateObject();
 	GetModuleData();
+
+#ifdef _EPO_ENABLE_
+
+	LbsAEpoStaInit();
+
+#endif
+	
 	ret=GetGpsLocation(60,1);
 	if(ret==0)
 		{
 			Ql_sprintf(tempbuf,"%d.%06d",gpsx.latitude/1000000,gpsx.latitude%1000000);
-			cJSON_AddItemToObject(root, AutomaticRD[6], cJSON_CreateString(tempbuf));
+			cJSON_AddItemToObject(root, AutomaticRD[2], cJSON_CreateString(tempbuf));
 			Ql_sprintf(tempbuf,"%d.%06d",gpsx.longitude/1000000,gpsx.longitude%1000000);
-			cJSON_AddItemToObject(root, AutomaticRD[7], cJSON_CreateString(tempbuf));
+			cJSON_AddItemToObject(root, AutomaticRD[3], cJSON_CreateString(tempbuf));
 		}
 	else
 		{
-			LBSDataInit();
-			WaitLbsGetLocation(100);
-			Ql_sprintf(tempbuf,"%d.%06d",LbsWeidu/1000000,LbsWeidu%1000000);
-			cJSON_AddItemToObject(root, AutomaticRD[0], cJSON_CreateString(tempbuf));
-			Ql_sprintf(tempbuf,"%d.%06d",LbsJingdu/1000000,LbsJingdu%1000000);
-			cJSON_AddItemToObject(root, AutomaticRD[1], cJSON_CreateString(tempbuf));
+			if(LbsWeidu==0||LbsJingdu==0)
+				{
+					LBSDataInit();
+					ret=WaitLbsGetLocation(200);
+					if(ret==0)
+						{
+							Ql_sprintf(tempbuf,"%d.%06d",LbsWeidu/1000000,LbsWeidu%1000000);
+							cJSON_AddItemToObject(root, AutomaticRD[0], cJSON_CreateString(tempbuf));
+							Ql_sprintf(tempbuf,"%d.%06d",LbsJingdu/1000000,LbsJingdu%1000000);
+							cJSON_AddItemToObject(root, AutomaticRD[1], cJSON_CreateString(tempbuf));
+						}
+				}
+			else
+				{
+					Ql_sprintf(tempbuf,"%d.%06d",LbsWeidu/1000000,LbsWeidu%1000000);
+					cJSON_AddItemToObject(root, AutomaticRD[0], cJSON_CreateString(tempbuf));
+					Ql_sprintf(tempbuf,"%d.%06d",LbsJingdu/1000000,LbsJingdu%1000000);
+					cJSON_AddItemToObject(root, AutomaticRD[1], cJSON_CreateString(tempbuf));
+				}
 		}
 	Ql_sprintf(tempbuf,"%d",module_data.bvol);
     cJSON_AddItemToObject(root, AutomaticRD[4], cJSON_CreateString(tempbuf));
@@ -379,6 +471,13 @@ s32 zyf_decode_cmd(char *Payload,u16 len)
 	if(ret==0)
 		{
 			systemset.Interval=strtol((const char*)value[2],NULL,10);
+			SaveFlashParamsNew(&systemset);
+			IotData_T=0;
+		}
+	ret=Ql_strcmp(value[0], AutomaticWR[4]);
+	if(ret==0)
+		{
+			systemset.HandInter=strtol((const char*)value[2],NULL,10);
 			SaveFlashParamsNew(&systemset);
 			IotData_T=0;
 		}
@@ -683,6 +782,7 @@ void setmcu2poweroff203c(void)
 {
 	u32 t2=systemset.Interval/60;
 	if(t2<1)t2=1;
+	zyf_protocol_info("setmcu2poweroff203c=%d min\r\n",t2); 
 	setmcu2eint();
 	setmcu2poweroff(t2);
 	setmcu2pinoff();

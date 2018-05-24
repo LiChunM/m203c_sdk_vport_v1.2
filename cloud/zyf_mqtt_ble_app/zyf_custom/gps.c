@@ -444,12 +444,13 @@ s32 GetGpsLocation(u32 timeout, u8 op)
                 }
                 else
                 {
-                   // mprintf("%s\r\n", rdBuff);
+                    mprintf("%s\r\n", rdBuff);
                     GpsAnalysis((u8*)rdBuff);
                     GPS_package(&gpsx, &my_core_data);
                 }
                 if (gpsx.useorno == 65)
                 {
+                	LED3_H;
                     iRet = GpsClose();
                     if (RIL_AT_SUCCESS != iRet)
                     {
@@ -467,6 +468,7 @@ s32 GetGpsLocation(u32 timeout, u8 op)
             }
             if (gpsx.useorno != 65)
             {
+            	LED3_L;
                 iRet = GpsClose();
                 if (RIL_AT_SUCCESS != iRet)
                 {

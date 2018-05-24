@@ -636,8 +636,8 @@ u32 IotData_T=0;
 
 static void Callback_Iot_Timer(u32 timerId, void* param)
 {
-	u32 t1=systemset.HandInter/10;
-	u32 t2=systemset.Interval/10;
+	u32 t1=60/10;
+	u32 t2=systemset.HandInter/10;
 	if(t1<1)t1=1;
 	if(t2<1)t2=1;
 	if(user_mqtt_clint_sta==USER_MQTT_CLINT_OK)

@@ -53,8 +53,8 @@ void Delayus(u32 data)
 
 void  LoadDefualtCfg(void)
 {
-	systemset.Interval=100;
-	systemset.HandInter=60; 
+	systemset.Interval=600;
+	systemset.HandInter=200; 
 	systemset.SysTime=0;
 	systemset.saveflag=0x0A;
 	systemset.fotaflag=0;

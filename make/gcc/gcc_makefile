@@ -24,11 +24,11 @@ GCC_VERSION=4.6.1
 #-------------------------------------------------------------------------------
 #GCC_INSTALL_PATH=C:\Program Files\CodeSourcery\Sourcery_CodeBench_Lite_for_ARM_EABI 
 
-C_PREDEF=-D __EXAMPLE_FOTA_FTP__
+C_PREDEF=-D __ZFY_TRACKER_MQTT_APP__
 #-------------------------------------------------------------------------------
 # Configure the Cloud Solution
 #-------------------------------------------------------------------------------
-CLOUD_SOLUTION=
+CLOUD_SOLUTION=ZYF_TRACKER_MQTT_SOLUTION
 #ZYF_SOLUTION
 #ZYF_MQTT_SOLUTION
 #ZYF_TEST_SOLUTION

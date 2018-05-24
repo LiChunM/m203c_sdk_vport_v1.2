@@ -62,9 +62,9 @@ static void Callback_BLE_Timer(u32 timerId, void* param)
 {
 	if(ble_mqtt_info.mqttsta)
 		{
-			if(ble_mqtt_info.heartping>=systemset.Interval)
+			if(ble_mqtt_info.heartping>=120)
 					{
-							Ql_OS_TakeMutex(MyMutexID);
+							MyMutexID=1;
 							if(ble_mqtt_info.blesta==1)
 								{
 									ScanBlecom(0,"ABCD",10);
@@ -73,7 +73,7 @@ static void Callback_BLE_Timer(u32 timerId, void* param)
 							Send_BleList2Server();
 							ble_infos.index=0;
 							ble_mqtt_info.heartping=0;
-							Ql_OS_GiveMutex(MyMutexID);
+							MyMutexID=0;
 
 					}
 				mprintf("heartping=%d\r\n",ble_mqtt_info.heartping);
@@ -99,7 +99,6 @@ void proc_main_task(s32 taskId)
 	ble_mqtt_info.heartping=0;
 	ble_mqtt_info.mqttsta=0;
 	ble_info_listInit();
-	MyMutexID = Ql_OS_CreateMutex("MyMutex");
 	BLE_Timer_init(TIMER_ID_USER_START + BLE_TIMER_ID, BLE_TIMER_MS);
     while (1)
     {
@@ -147,11 +146,12 @@ void proc_subtask2(s32 TaskId)
 							Ql_Sleep(1000);
 							if(ble_mqtt_info.blesta==0)
 								{
-									ble_sta_t=0;
-									ble_mqtt_info.blesta=1;
-									Ql_OS_TakeMutex(MyMutexID);
-									ScanBlecom(1,"ABCD",1);
-									Ql_OS_GiveMutex(MyMutexID);
+									if(MyMutexID==0)
+										{
+											ble_sta_t=0;
+											ble_mqtt_info.blesta=1;
+											ScanBlecom(1,"ABCD",1);
+										}
 								}
 						}
 				}

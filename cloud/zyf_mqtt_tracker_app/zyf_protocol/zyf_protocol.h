@@ -29,12 +29,13 @@
 #include "ql_trace.h"
 
 
+#define _EPO_ENABLE_
 #define ZYF_PRO_DEBUG
 #define _USE_MCU_PRO_
 
 //#define _USE_USER_DWQ_
 
-#define SW_VERSION	"18041801"
+#define SW_VERSION	"18052201"
 
 
 
